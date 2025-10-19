@@ -1,0 +1,243 @@
+<main class="bg-gray-900 text-gray-200 min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
+  <div class="max-w-7xl mx-auto">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">
+        Prompt Studio 2.0
+      </h1>
+      <p class="mt-2 text-lg text-gray-400">Bộ công cụ toàn diện cho Prompt Engineering</p>
+    </header>
+
+    <!-- TABS -->
+    <div class="mb-6 flex justify-center border-b border-gray-700">
+      <button (click)="activeTab.set('create')"
+              [class]="activeTab() === 'create' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'"
+              class="py-3 px-6 font-semibold border-b-2 transition-colors duration-300">
+        Tạo Prompt
+      </button>
+      <button (click)="activeTab.set('analyze')"
+              [class]="activeTab() === 'analyze' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'"
+              class="py-3 px-6 font-semibold border-b-2 transition-colors duration-300">
+        Phân Tích Prompt
+      </button>
+    </div>
+
+    <!-- TAB CONTENT -->
+    @if (activeTab() === 'create') {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- ===== CỘT INPUT ===== -->
+        <div class="flex flex-col gap-6 p-6 bg-gray-800/50 rounded-2xl border border-gray-700 shadow-lg">
+          
+          <div class="flex flex-wrap gap-2 items-center border-b border-gray-700 pb-4">
+            <h2 class="text-xl font-semibold text-cyan-400 flex-grow">Công Cụ Tạo Prompt</h2>
+            <input #projectUpload type="file" id="projectUpload" class="hidden" (change)="onProjectImport($event)" accept=".json">
+            <button (click)="projectUpload.click()" class="text-sm bg-gray-700 hover:bg-gray-600 text-cyan-300 font-semibold py-1.5 px-3 rounded-full transition-colors">Tải lên .json</button>
+            <button (click)="exportProject()" class="text-sm bg-gray-700 hover:bg-gray-600 text-cyan-300 font-semibold py-1.5 px-3 rounded-full transition-colors">Lưu dự án .json</button>
+          </div>
+
+          <!-- Step 1: Define with C.O.R.E -->
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-lg font-semibold text-cyan-400">1. Define (Xác định với C.O.R.E)</h3>
+              <button (click)="fillExample()" class="text-sm bg-gray-700 hover:bg-gray-600 text-cyan-300 font-semibold py-1 px-3 rounded-full transition-colors">Xem ví dụ</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label for="context" class="block text-md font-medium text-gray-300 mb-1">C - Context</label>
+                <textarea id="context" [(ngModel)]="context" rows="3" placeholder="Bối cảnh..." class="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm focus:ring-2 focus:ring-cyan-500"></textarea>
+              </div>
+              <div>
+                <label for="objective" class="block text-md font-medium text-gray-300 mb-1">O - Objective</label>
+                <textarea id="objective" [(ngModel)]="objective" rows="3" placeholder="Mục tiêu..." class="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm focus:ring-2 focus:ring-cyan-500"></textarea>
+              </div>
+              <div>
+                <label for="role" class="block text-md font-medium text-gray-300 mb-1">R - Role</label>
+                <textarea id="role" [(ngModel)]="role" rows="3" placeholder="Vai trò AI..." class="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm focus:ring-2 focus:ring-cyan-500"></textarea>
+              </div>
+              <div>
+                <label for="expectations" class="block text-md font-medium text-gray-300 mb-1">E - Expectations</label>
+                <textarea id="expectations" [(ngModel)]="expectations" rows="3" placeholder="Kỳ vọng..." class="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm focus:ring-2 focus:ring-cyan-500"></textarea>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Step 2-3 & Media -->
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label for="systemInstruction" class="block text-lg font-semibold text-cyan-400 mb-2">2. System Instruction</label>
+              <textarea id="systemInstruction" [(ngModel)]="systemInstruction" rows="3" placeholder="Ví dụ: Bạn là một chuyên gia marketing..." class="w-full bg-gray-700 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-cyan-500"></textarea>
+            </div>
+            <div>
+              <label for="promptBody" class="block text-lg font-semibold text-cyan-400 mb-2">3. Prompt Engineering</label>
+              <textarea id="promptBody" [(ngModel)]="promptBody" rows="5" placeholder="Mô tả chi tiết yêu cầu của bạn..." class="w-full bg-gray-700 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-cyan-500"></textarea>
+            </div>
+            <div>
+              <label for="mediaInstruction" class="block text-md font-medium text-gray-300 mb-2">File/Media Instruction</label>
+              @if (!uploadedFile()) {
+                <label for="fileUpload" class="mt-1 inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-500 text-gray-200 text-sm font-medium rounded-md cursor-pointer"> Tải lên tệp </label>
+                <input id="fileUpload" type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*">
+              } @else {
+                <div class="mt-1 flex items-center justify-between bg-gray-700 p-2 rounded-md"><p class="text-sm truncate pr-2">{{ uploadedFile()?.name }}</p><button (click)="removeFile()" class="p-1 text-gray-400 hover:text-white rounded-full">X</button></div>
+              }
+            </div>
+          </div>
+          
+          <!-- Step 4: Parameter Tunings -->
+          <div class="border-t border-gray-700 pt-4">
+            <h2 class="text-xl font-semibold text-cyan-400 mb-4">4. Tinh chỉnh tham số</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="aiPlatform" class="block text-md font-medium text-gray-300 mb-2">Nền tảng AI</label>
+                    <select id="aiPlatform" [(ngModel)]="aiPlatform" class="w-full bg-gray-700 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-cyan-500">
+                        @for (p of platforms; track p) { <option [value]="p">{{ p }}</option> }
+                    </select>
+                </div>
+                <div>
+                    <label for="outputType" class="block text-md font-medium text-gray-300 mb-2">Định dạng đầu ra</label>
+                    <select id="outputType" [(ngModel)]="outputType" class="w-full bg-gray-700 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-cyan-500">
+                        @for (t of outputTypes; track t) { <option [value]="t">{{ t }}</option> }
+                    </select>
+                </div>
+
+                @if (isMediaOutput()) {
+                  <div class="sm:col-span-2">
+                    <label for="aspectRatio" class="block text-md font-medium text-gray-300 mb-2">Tỷ lệ khung hình (Image)</label>
+                    <select id="aspectRatio" [(ngModel)]="aspectRatio" class="w-full bg-gray-700 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-cyan-500">
+                      @for (ratio of aspectRatioKeys; track ratio) { <option [value]="ratio">{{ ratio }} ({{ aspectRatios[ratio] }})</option> }
+                    </select>
+                  </div>
+                } @else {
+                   <div class="space-y-3 sm:col-span-2">
+                      <div>
+                        <label for="temperature" class="block text-md font-medium text-gray-300">Temperature: <span class="font-mono text-cyan-300">{{ temperature() }}</span></label>
+                        <input id="temperature" type="range" min="0" max="1" step="0.05" [(ngModel)]="temperature" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-400 mt-1">Kiểm soát sáng tạo: cao hơn = đa dạng hơn, thấp hơn = tập trung hơn.</p>
+                      </div>
+                      <div>
+                        <label for="topP" class="block text-md font-medium text-gray-300">Top-P: <span class="font-mono text-cyan-300">{{ topP() }}</span></label>
+                        <input id="topP" type="range" min="0" max="1" step="0.05" [(ngModel)]="topP" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-400 mt-1">Kiểm soát lựa chọn từ ngữ để văn bản ít ngẫu nhiên hơn.</p>
+                      </div>
+                   </div>
+                }
+
+                <div class="sm:col-span-2">
+                    <label class="block text-md font-medium text-gray-300 mb-2">Ngôn ngữ Prompt Master (chọn nhiều)</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        @for (lang of languages; track lang) {
+                        <label class="flex items-center p-2 bg-gray-700/50 rounded-md cursor-pointer hover:bg-gray-700"><input type="checkbox" [checked]="masterLanguages()[lang]" (change)="toggleMasterLanguage(lang)" class="h-4 w-4 rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-600"><span class="ml-2 text-sm">{{ lang }}</span></label>
+                        }
+                    </div>
+                </div>
+            </div>
+          </div>
+          
+          <!-- Step 5: Test & Export -->
+          <div>
+            <button (click)="generatePrompt()" [disabled]="generationState().isLoading" class="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center text-lg">
+              @if (generationState().isLoading) { <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Đang xử lý... }
+              @else { <span class="mr-2">🚀</span> Tạo Prompt Master }
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== CỘT OUTPUT ===== -->
+        <div class="flex flex-col gap-6 p-6 bg-gray-800/50 rounded-2xl border border-gray-700 shadow-lg min-h-[400px]">
+          @if (generationState().isLoading) {
+            <div class="flex flex-col items-center justify-center h-full text-gray-400">
+              <svg class="animate-spin h-8 w-8 text-cyan-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <p class="text-lg font-semibold">{{ generationState().loadingMessage }}</p>
+            </div>
+          } @else if (generationState().error) {
+            <div class="flex items-center justify-center h-full bg-red-900/50 text-red-300 p-4 rounded-lg">
+              <p><strong>Lỗi!</strong> {{ generationState().error }}</p>
+            </div>
+          } @else if (generationState().masterPrompts.length > 0) {
+            <div class="flex flex-col gap-6 h-full">
+              <!-- Master Prompts -->
+              <div class="flex-shrink-0">
+                <h2 class="text-xl font-semibold text-cyan-400 mb-3">Prompt Master</h2>
+                <div class="space-y-4 max-h-[250px] overflow-y-auto pr-2">
+                  @for (p of generationState().masterPrompts; track p.language) {
+                    <div class="bg-gray-900/50 p-3 rounded-lg">
+                      <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-semibold text-gray-300">{{ p.language }}</h3>
+                        <button (click)="copyToClipboard(p.prompt)" class="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-300 font-semibold py-1 px-2 rounded-full transition-colors">Copy</button>
+                      </div>
+                      <p class="text-sm text-gray-300 whitespace-pre-wrap font-mono">{{ p.prompt }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+              <!-- Preview -->
+              <div class="flex-grow flex flex-col min-h-0">
+                <h2 class="text-xl font-semibold text-cyan-400 mb-3">Xem trước kết quả</h2>
+                <div class="flex-grow bg-gray-900/50 rounded-lg p-4 overflow-auto">
+                  @switch (generationState().preview.type) {
+                    @case ('image') {
+                      <img [src]="generationState().preview.content" alt="Generated preview" class="rounded-md max-w-full h-auto mx-auto">
+                    }
+                    @case ('video') {
+                      <video [src]="generationState().preview.content" controls class="w-full rounded-md"></video>
+                    }
+                    @case ('text') {
+                      <p class="text-gray-300 whitespace-pre-wrap">{{ generationState().preview.content }}</p>
+                    }
+                    @default {
+                      <div class="flex items-center justify-center h-full"><p class="text-gray-500">Chưa có kết quả để xem trước.</p></div>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-col items-center justify-center h-full text-gray-400 text-center">
+              <h3 class="text-xl font-semibold text-gray-300">Kết quả sẽ xuất hiện ở đây</h3>
+              <p class="mt-1">Điền thông tin và nhấn "Tạo Prompt Master" để bắt đầu.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <!-- ANALYZE TAB -->
+      <div class="max-w-4xl mx-auto flex flex-col gap-6">
+        <div class="p-6 bg-gray-800/50 rounded-2xl border border-gray-700 shadow-lg">
+          <h2 class="text-2xl font-semibold text-cyan-400 mb-4">Phân Tích & Đánh Giá Prompt</h2>
+          <p class="text-gray-400 mb-4">Dán prompt của bạn vào đây để AI phân tích chất lượng dựa trên C.O.R.E, chấm điểm và đưa ra gợi ý cải thiện.</p>
+          <textarea [(ngModel)]="promptToAnalyze" rows="8" placeholder="Dán prompt của bạn vào đây..." class="w-full bg-gray-700 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-cyan-500"></textarea>
+          <button (click)="analyzePrompt()" [disabled]="analysisState().isLoading" class="mt-4 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center text-lg">
+            @if (analysisState().isLoading) { <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Đang phân tích... }
+            @else { <span class="mr-2">🔍</span> Phân Tích }
+          </button>
+        </div>
+
+        <!-- Analysis Results -->
+        <div class="p-6 bg-gray-800/50 rounded-2xl border border-gray-700 shadow-lg min-h-[200px]">
+          @if (analysisState().isLoading) {
+            <div class="flex flex-col items-center justify-center h-full text-gray-400"><svg class="animate-spin h-8 w-8 text-cyan-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Đang phân tích...</div>
+          } @else if (analysisState().error) {
+            <div class="flex items-center justify-center h-full bg-red-900/50 text-red-300 p-4 rounded-lg"><p><strong>Lỗi!</strong> {{ analysisState().error }}</p></div>
+          } @else if (analysisState().result; as result) {
+            <div class="space-y-6">
+              <div class="text-center">
+                <h3 class="text-lg font-semibold text-gray-300">Điểm Chất Lượng Prompt</h3>
+                <p class="text-6xl font-bold" [class]="scoreColorClass()">{{ result.score }}/100</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-gray-900/50 p-4 rounded-lg"><h4 class="font-semibold text-cyan-400 mb-1">Context</h4><p>{{ result.analysis.context }}</p></div>
+                <div class="bg-gray-900/50 p-4 rounded-lg"><h4 class="font-semibold text-cyan-400 mb-1">Objective</h4><p>{{ result.analysis.objective }}</p></div>
+                <div class="bg-gray-900/50 p-4 rounded-lg"><h4 class="font-semibold text-cyan-400 mb-1">Role</h4><p>{{ result.analysis.role }}</p></div>
+                <div class="bg-gray-900/50 p-4 rounded-lg"><h4 class="font-semibold text-cyan-400 mb-1">Expectations</h4><p>{{ result.analysis.expectations }}</p></div>
+              </div>
+              <div class="bg-gray-900/50 p-4 rounded-lg">
+                <h4 class="font-semibold text-cyan-400 mb-2 text-lg">Gợi ý cải thiện</h4>
+                <p class="text-gray-300 whitespace-pre-wrap">{{ result.suggestions }}</p>
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-col items-center justify-center h-full text-gray-400 text-center"><h3 class="text-xl font-semibold text-gray-300">Kết quả phân tích sẽ xuất hiện ở đây</h3><p class="mt-1">Nhập prompt và nhấn "Phân Tích" để bắt đầu.</p></div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</main>
