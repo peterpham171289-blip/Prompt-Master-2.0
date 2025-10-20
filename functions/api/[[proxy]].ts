@@ -1,10 +1,8 @@
-/// <reference types="@cloudflare/workers-types" />
+// FIX: Removed the triple-slash directive for Cloudflare workers types as it was causing a "Cannot find type definition file" error in the provided environment. The necessary web standard types like Request and Response are assumed to be available.
 
 // File: functions/api/[[proxy]].ts
 
-// FIX: The triple-slash directive was misplaced. It must be at the top of the file to correctly load the Cloudflare Workers types. This directive is what defines the 'PagesFunction' type.
-
-import { GoogleGenAI, GenerateContentResponse, Part, Type } from '@google/genai';
+import { GoogleGenAI, GenerateContentResponse, Part, Type } from 'https://esm.sh/@google/genai@1.25.0';
 
 // Define the environment variables expected by the function
 interface Env {
@@ -37,8 +35,8 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 // Main serverless function handler
-// The `PagesFunction` type is now available globally from the `@cloudflare/workers-types` package declared in package.json
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+// FIX: Replaced the 'PagesFunction' type, which was causing a resolution error, with an explicit inline type for the Cloudflare Pages function context. This resolves the "Cannot find name 'PagesFunction'" error by defining the shape of the context object directly.
+export const onRequestPost = async (context: { request: Request; env: Env; }): Promise<Response> => {
     const { request, env } = context;
     const apiKey = env.API_KEY;
 
