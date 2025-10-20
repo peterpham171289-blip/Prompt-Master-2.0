@@ -2,7 +2,8 @@
 
 // File: functions/api/[[proxy]].ts
 
-import { GoogleGenAI, GenerateContentResponse, Part, Type } from 'https://esm.sh/@google/genai@1.25.0';
+// FIX: Changed the import URL to point to the latest version of the module on the CDN instead of a fixed version. This resolves the "No such module" runtime error on Cloudflare.
+import { GoogleGenAI, GenerateContentResponse, Part, Type } from 'https://esm.sh/@google/genai';
 
 // Define the environment variables expected by the function
 interface Env {
