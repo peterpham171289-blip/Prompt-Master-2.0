@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, Injector } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GeminiService, PromptAnalysisResult } from './services/gemini.service';
+import { GeminiService, PromptAnalysisResult, PromptGenerationResponse } from './services/gemini.service';
 
 interface GenerationState {
   masterPrompts: { language: string; prompt: string }[];
@@ -20,7 +20,7 @@ interface AnalysisState {
     error: string | null;
 }
 
-// Interface for project data export/import
+// Interface for project data export/import - API key removed
 interface PromptProject {
   context: string;
   objective: string;
@@ -48,8 +48,7 @@ interface PromptProject {
   imports: [CommonModule, FormsModule],
 })
 export class AppComponent {
-  private injector = inject(Injector);
-  private geminiService: GeminiService | null = null;
+  private geminiService = inject(GeminiService);
 
   // --- UI State ---
   activeTab = signal<'create' | 'analyze'>('create');
@@ -99,13 +98,6 @@ export class AppComponent {
     this.aspectRatioKeys = Object.keys(this.aspectRatios);
   }
 
-  private getGeminiService(): GeminiService {
-    if (!this.geminiService) {
-      this.geminiService = this.injector.get(GeminiService);
-    }
-    return this.geminiService;
-  }
-
   async generatePrompt() {
     const selectedLanguages = Object.keys(this.masterLanguages()).filter(lang => this.masterLanguages()[lang]);
     if (selectedLanguages.length === 0) {
@@ -114,7 +106,7 @@ export class AppComponent {
     }
     this.generationState.update(s => ({ ...s, isLoading: true, error: null, loadingMessage: this.isMediaOutput() ? 'Đang tạo media... Quá trình này có thể mất vài phút.' : 'AI đang sáng tạo prompt và kết quả...' }));
     try {
-      const response = await this.getGeminiService().generateProfessionalPrompt({
+      const response = await this.geminiService.generateProfessionalPrompt({
         context: this.context(), objective: this.objective(), role: this.role(), expectations: this.expectations(),
         systemInstruction: this.systemInstruction(), promptBody: this.promptBody(), mediaInstruction: this.mediaInstruction(),
         aiPlatform: this.aiPlatform(), outputType: this.outputType(), file: this.uploadedFile() ?? undefined,
@@ -123,11 +115,7 @@ export class AppComponent {
       });
       this.generationState.set({ masterPrompts: response.masterPrompts, preview: response.preview, isLoading: false, error: null, loadingMessage: '' });
     } catch (error: any) {
-       if (error?.message === 'API_KEY_MISSING' || (error instanceof ReferenceError && error.message.includes('process is not defined'))) {
-          this.generationState.update(state => ({ ...state, isLoading: false, error: 'Lỗi cấu hình: API_KEY chưa được thiết lập. Vui lòng cấu hình biến môi trường trong phần cài đặt của Cloudflare Pages.' }));
-      } else {
-          this.generationState.update(state => ({ ...state, isLoading: false, error: error.message }));
-      }
+       this.generationState.update(state => ({ ...state, isLoading: false, error: error.message }));
     }
   }
 
@@ -138,14 +126,10 @@ export class AppComponent {
       }
       this.analysisState.set({ result: null, isLoading: true, error: null });
       try {
-          const result = await this.getGeminiService().analyzePromptQuality(this.promptToAnalyze());
+          const result = await this.geminiService.analyzePromptQuality(this.promptToAnalyze());
           this.analysisState.set({ result, isLoading: false, error: null });
       } catch (error: any) {
-          if (error?.message === 'API_KEY_MISSING' || (error instanceof ReferenceError && error.message.includes('process is not defined'))) {
-            this.analysisState.update(s => ({ ...s, isLoading: false, error: 'Lỗi cấu hình: API_KEY chưa được thiết lập. Vui lòng cấu hình biến môi trường trong phần cài đặt của Cloudflare Pages.' }));
-        } else {
-            this.analysisState.update(s => ({ ...s, isLoading: false, error: error.message }));
-        }
+          this.analysisState.update(s => ({ ...s, isLoading: false, error: error.message }));
       }
   }
 
@@ -158,6 +142,7 @@ export class AppComponent {
       temperature: this.temperature(), topP: this.topP(), aspectRatio: this.aspectRatio(),
       generationState: this.generationState(),
     };
+
     const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -193,6 +178,7 @@ export class AppComponent {
         this.topP.set(project.topP ?? 0.95);
         this.aspectRatio.set(project.aspectRatio ?? '1:1');
         this.generationState.set(project.generationState ?? { masterPrompts: [], preview: { type: null, content: '' }, isLoading: false, error: null, loadingMessage: '...' });
+        
         this.activeTab.set('create');
       } catch (e) {
         this.generationState.update(s => ({ ...s, error: "Tệp dự án không hợp lệ hoặc bị hỏng." }));
