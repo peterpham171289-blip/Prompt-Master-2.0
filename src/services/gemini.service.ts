@@ -56,10 +56,12 @@ export class GeminiService {
    * securely provides this key to the client-side code without exposing it publicly to end-users.
    */
   constructor() {
-    if (!process.env.API_KEY) {
-      console.warn("API_KEY environment variable not set.");
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      // This custom error makes it much easier to handle in the component.
+      throw new Error('API_KEY_MISSING');
     }
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   async generateProfessionalPrompt(

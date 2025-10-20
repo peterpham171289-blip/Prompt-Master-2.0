@@ -123,7 +123,7 @@ export class AppComponent {
       });
       this.generationState.set({ masterPrompts: response.masterPrompts, preview: response.preview, isLoading: false, error: null, loadingMessage: '' });
     } catch (error: any) {
-       if (error instanceof ReferenceError && error.message.includes('process is not defined')) {
+       if (error?.message === 'API_KEY_MISSING' || (error instanceof ReferenceError && error.message.includes('process is not defined'))) {
           this.generationState.update(state => ({ ...state, isLoading: false, error: 'Lỗi cấu hình: API_KEY chưa được thiết lập. Vui lòng cấu hình biến môi trường trong phần cài đặt của Cloudflare Pages.' }));
       } else {
           this.generationState.update(state => ({ ...state, isLoading: false, error: error.message }));
@@ -141,7 +141,7 @@ export class AppComponent {
           const result = await this.getGeminiService().analyzePromptQuality(this.promptToAnalyze());
           this.analysisState.set({ result, isLoading: false, error: null });
       } catch (error: any) {
-          if (error instanceof ReferenceError && error.message.includes('process is not defined')) {
+          if (error?.message === 'API_KEY_MISSING' || (error instanceof ReferenceError && error.message.includes('process is not defined'))) {
             this.analysisState.update(s => ({ ...s, isLoading: false, error: 'Lỗi cấu hình: API_KEY chưa được thiết lập. Vui lòng cấu hình biến môi trường trong phần cài đặt của Cloudflare Pages.' }));
         } else {
             this.analysisState.update(s => ({ ...s, isLoading: false, error: error.message }));
