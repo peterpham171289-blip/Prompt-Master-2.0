@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GeminiService, PromptAnalysisResult, PromptGenerationResponse } from './services/gemini.service';
+import { GeminiService, PromptAnalysisResult } from './services/gemini.service';
 
 interface GenerationState {
   masterPrompts: { language: string; prompt: string }[];
@@ -20,7 +20,7 @@ interface AnalysisState {
     error: string | null;
 }
 
-// Interface for project data export/import - API key removed
+// Interface for project data export/import
 interface PromptProject {
   context: string;
   objective: string;
@@ -115,7 +115,7 @@ export class AppComponent {
       });
       this.generationState.set({ masterPrompts: response.masterPrompts, preview: response.preview, isLoading: false, error: null, loadingMessage: '' });
     } catch (error: any) {
-       this.generationState.update(state => ({ ...state, isLoading: false, error: error.message }));
+      this.generationState.update(state => ({ ...state, isLoading: false, error: error.message }));
     }
   }
 
@@ -142,7 +142,6 @@ export class AppComponent {
       temperature: this.temperature(), topP: this.topP(), aspectRatio: this.aspectRatio(),
       generationState: this.generationState(),
     };
-
     const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -178,7 +177,6 @@ export class AppComponent {
         this.topP.set(project.topP ?? 0.95);
         this.aspectRatio.set(project.aspectRatio ?? '1:1');
         this.generationState.set(project.generationState ?? { masterPrompts: [], preview: { type: null, content: '' }, isLoading: false, error: null, loadingMessage: '...' });
-        
         this.activeTab.set('create');
       } catch (e) {
         this.generationState.update(s => ({ ...s, error: "Tệp dự án không hợp lệ hoặc bị hỏng." }));
