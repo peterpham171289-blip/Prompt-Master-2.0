@@ -1,5 +1,8 @@
 // File: functions/api/[[proxy]].ts
 
+// FIX: Add a triple-slash directive to include Cloudflare Workers types, which defines the 'PagesFunction' type.
+/// <reference types="@cloudflare/workers-types" />
+
 import { GoogleGenAI, GenerateContentResponse, Part, Type } from '@google/genai';
 
 // Define the environment variables expected by the function
@@ -32,10 +35,8 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
     return btoa(binary);
 }
 
-// FIX: Add a minimal type definition for Cloudflare Pages functions to resolve the 'PagesFunction' not found error.
-type PagesFunction<Env = unknown> = (context: { request: Request; env: Env; }) => Promise<Response>;
-
 // Main serverless function handler
+// The `PagesFunction` type is now available globally from the `@cloudflare/workers-types` package declared in package.json
 export const onRequestPost: PagesFunction<Env> = async (context) => {
     const { request, env } = context;
     const apiKey = env.API_KEY;
