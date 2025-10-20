@@ -1,5 +1,5 @@
 {
-  "name": "Prompt Studio 2.0",
+  "name": "Prompt Studio 2.0 Deploy CloudFlare",
   "description": "Một ứng dụng giúp xây dựng các prompt chuyên nghiệp cho các mô hình AI như Gemini, ChatGPT bằng quy trình 5 bước: Define, System Instruction, Prompt Engineering, Parameter Tunings, và Test & Export.",
   "requestFramePermissions": []
 }

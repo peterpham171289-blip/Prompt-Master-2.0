@@ -1,5 +1,5 @@
 {
-  "name": "prompt-studio-2.0",
+  "name": "prompt-studio-2.0-deploy-cloudflare",
   "private": true,
   "version": "0.0.0",
   "type": "module",

@@ -48,6 +48,13 @@ const VIDEO_OUTPUT_TYPES = ['Video', 'Phim ngắn'];
 export class GeminiService {
   private ai: GoogleGenAI;
 
+  /**
+   * NOTE FOR DEPLOYMENT:
+   * This service relies on `process.env.API_KEY`. For a production deployment on a platform
+   * like Cloudflare Pages, it is crucial to configure the API_KEY as a secure environment
+   * variable in the project's settings. The application assumes the execution environment
+   * securely provides this key to the client-side code without exposing it publicly to end-users.
+   */
   constructor() {
     if (!process.env.API_KEY) {
       console.warn("API_KEY environment variable not set.");
