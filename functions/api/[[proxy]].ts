@@ -1,7 +1,8 @@
+/// <reference types="@cloudflare/workers-types" />
+
 // File: functions/api/[[proxy]].ts
 
-// FIX: Add a triple-slash directive to include Cloudflare Workers types, which defines the 'PagesFunction' type.
-/// <reference types="@cloudflare/workers-types" />
+// FIX: The triple-slash directive was misplaced. It must be at the top of the file to correctly load the Cloudflare Workers types. This directive is what defines the 'PagesFunction' type.
 
 import { GoogleGenAI, GenerateContentResponse, Part, Type } from '@google/genai';
 
